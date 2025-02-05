@@ -1,0 +1,36 @@
+FROM ubuntu:24.04
+
+ENV ANDROID_HOME /opt/android-sdk
+ENV PATH ${PATH}:${ANDROID_HOME}/cmdline-tools/tools/bin:${ANDROID_HOME}/platform-tools
+
+RUN apt-get update && \
+    apt-get install -q -y --no-install-recommends \
+    openjdk-17-jdk \
+    wget \
+    unzip \
+    git \
+    curl \
+    libarchive-tools \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN set -x && mkdir -p ${ANDROID_HOME}/cmdline-tools && \
+    wget -q https://dl.google.com/android/repository/commandlinetools-linux-6609375_latest.zip -O /tmp/cmdline-tools.zip && \
+    unzip -q /tmp/cmdline-tools.zip -d ${ANDROID_HOME}/cmdline-tools && \
+    rm /tmp/cmdline-tools.zip
+
+RUN yes | sdkmanager --licenses
+
+RUN sdkmanager "platform-tools" "platforms;android-30" "build-tools;30.0.3"
+
+WORKDIR /app/android
+
+COPY android/prepare.sh /app/android 
+RUN ./prepare.sh
+
+COPY . /app
+
+RUN ./gradlew assembleDebug 
+RUN ./gradlew assembleRelease 
+RUN find -name '*.apk' |xargs ls -ltr 
+
+ENTRYPOINT ["./gradlew"]

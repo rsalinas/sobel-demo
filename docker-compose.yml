@@ -1,0 +1,22 @@
+version: "3.8"
+services:
+  sobelcam:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command:
+    - -c
+    container_name: sobel
+    devices:
+    - /dev/video0:/dev/video0  # Expose camera
+
+    # Some configuration for X11
+    environment:
+      DISPLAY: ${DISPLAY}   
+      XAUTHORITY: /tmp/.Xauthority
+    volumes:
+    - /tmp/.X11-unix:/tmp/.X11-unix
+    - ${XAUTHORITY}:/tmp/.Xauthority
+
+    image: sobel
+

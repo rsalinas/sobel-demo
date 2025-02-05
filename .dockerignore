@@ -1,0 +1,4 @@
+Dockerfile*
+.dockerignore
+android/opencv/
+android/app/build/
